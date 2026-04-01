@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import ora from 'ora';
 import chalk from 'chalk';
-import { getPages } from '../services/storage.js';
+import { getPages, getDrafts } from '../services/storage.js';
 import { postText, postPhoto } from '../services/facebook.js';
 import { searchImageCommand } from './search-image.js';
 import { logger } from '../utils/logger.js';
@@ -35,6 +35,37 @@ export async function postCommand(options = {}) {
     page = answer.page;
   }
 
+  // --- Tải từ bài nháp (nếu không có --message) ---
+  let draftImagePath = null;
+  if (!options.message && !options.image) {
+    const drafts = await getDrafts();
+    if (drafts.length > 0) {
+      const { useDraft } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'useDraft',
+          message: `Bạn có ${drafts.length} bài nháp. Tải nội dung từ bài nháp?`,
+          default: false,
+        },
+      ]);
+      if (useDraft) {
+        const { draft } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'draft',
+            message: 'Chọn bài nháp:',
+            choices: drafts.map((d) => ({
+              name: `${d.title}  ${chalk.dim(new Date(d.updatedAt).toLocaleString('vi-VN'))}`,
+              value: d,
+            })),
+          },
+        ]);
+        options.message = draft.content;
+        draftImagePath = draft.imagePath;
+      }
+    }
+  }
+
   // --- Nhập nội dung ---
   let content;
   if (options.message) {
@@ -52,9 +83,9 @@ export async function postCommand(options = {}) {
   }
 
   // --- Chọn ảnh ---
-  let imagePath = null;
-  if (options.image) {
-    imagePath = options.image;
+  let imagePath = options.image || draftImagePath || null;
+  if (imagePath) {
+    logger.info(`Dùng ảnh: ${imagePath}`);
   } else {
     const { wantImage } = await inquirer.prompt([
       {

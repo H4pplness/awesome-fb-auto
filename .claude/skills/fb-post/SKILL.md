@@ -35,7 +35,21 @@ node bin/fb-post.js post
 # Sau khi cài global (npm link hoặc npm install -g .)
 fb-post add-page
 fb-post list-pages
+
+# Đăng bài nhanh 1 dòng (không cần prompt)
+fb-post post -p "Trang chính" -m "Nội dung bài" --no-preview -y
+fb-post post -p "Shop A" -m "Flash sale!" -i "/path/anh.jpg" --no-preview -y
 ```
+
+**Flags của lệnh `post`:**
+
+| Flag | Tác dụng |
+|---|---|
+| `-p, --page <name>` | Tên gợi nhớ page, bỏ qua prompt chọn page |
+| `-m, --message <text>` | Nội dung bài, bỏ qua editor |
+| `-i, --image <path>` | Đường dẫn ảnh local |
+| `--no-preview` | Bỏ qua bước mở preview trình duyệt |
+| `-y, --yes` | Tự xác nhận, không hỏi lại |
 
 ### Nếu `$ARGUMENTS` là `debug`
 

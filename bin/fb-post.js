@@ -5,6 +5,7 @@ import { addPageCommand } from '../src/commands/add-page.js';
 import { listPagesCommand } from '../src/commands/list-pages.js';
 import { searchImageCommand } from '../src/commands/search-image.js';
 import { postCommand } from '../src/commands/post.js';
+import { draftMenuCommand, draftListCommand, draftSaveCommand, draftPreviewCommand, draftDeleteCommand } from '../src/commands/draft.js';
 
 program
   .name('fb-post')
@@ -38,5 +39,30 @@ program
   .option('--no-preview', 'Bỏ qua bước preview')
   .option('-y, --yes', 'Tự động xác nhận, không hỏi lại')
   .action((options) => postCommand(options));
+
+const draft = program
+  .command('draft')
+  .description('Quản lý bài viết nháp')
+  .action(draftMenuCommand);
+
+draft
+  .command('list')
+  .description('Xem danh sách bài nháp')
+  .action(draftListCommand);
+
+draft
+  .command('save')
+  .description('Lưu bài viết mới vào nháp')
+  .action(() => draftSaveCommand());
+
+draft
+  .command('preview')
+  .description('Preview bài nháp trong trình duyệt')
+  .action(draftPreviewCommand);
+
+draft
+  .command('delete')
+  .description('Xóa bài nháp')
+  .action(draftDeleteCommand);
 
 program.parse(process.argv);
