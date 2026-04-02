@@ -34,18 +34,30 @@ export async function draftListCommand() {
 
 // ── Lưu bài nháp mới ──────────────────────────────────────────────────────────
 
-export async function draftSaveCommand(prefill = {}) {
+export async function draftSaveCommand(options = {}) {
+  // Chế độ nhanh: đủ --title và --message thì lưu luôn không hỏi
+  if (options.title && options.message) {
+    const draft = await saveDraft({
+      title: options.title.trim(),
+      content: options.message.trim(),
+      imagePath: options.image || null,
+    });
+    logger.success(`Đã lưu nháp "${draft.title}" (id: ${draft.id.slice(0, 8)}…)`);
+    return draft;
+  }
+
+  // Chế độ interactive
   const { title } = await inquirer.prompt([
     {
       type: 'input',
       name: 'title',
       message: 'Tiêu đề bài nháp (để gợi nhớ):',
-      default: prefill.title,
+      default: options.title,
       validate: (v) => v.trim() !== '' || 'Tiêu đề không được để trống',
     },
   ]);
 
-  let content = prefill.content;
+  let content = options.message;
   if (!content) {
     const answer = await inquirer.prompt([
       {
@@ -58,27 +70,27 @@ export async function draftSaveCommand(prefill = {}) {
     content = answer.content;
   }
 
-  const { wantImage } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'wantImage',
-      message: 'Đính kèm đường dẫn ảnh không?',
-      default: !!prefill.imagePath,
-    },
-  ]);
-
-  let imagePath = null;
-  if (wantImage) {
-    const { localPath } = await inquirer.prompt([
+  let imagePath = options.image || null;
+  if (!imagePath) {
+    const { wantImage } = await inquirer.prompt([
       {
-        type: 'input',
-        name: 'localPath',
-        message: 'Đường dẫn file ảnh:',
-        default: prefill.imagePath || '',
-        validate: (v) => v.trim() !== '' || 'Đường dẫn không được để trống',
+        type: 'confirm',
+        name: 'wantImage',
+        message: 'Đính kèm đường dẫn ảnh không?',
+        default: false,
       },
     ]);
-    imagePath = localPath.trim();
+    if (wantImage) {
+      const { localPath } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'localPath',
+          message: 'Đường dẫn file ảnh:',
+          validate: (v) => v.trim() !== '' || 'Đường dẫn không được để trống',
+        },
+      ]);
+      imagePath = localPath.trim();
+    }
   }
 
   const draft = await saveDraft({ title: title.trim(), content: content.trim(), imagePath });
@@ -107,12 +119,16 @@ export async function draftPreviewCommand() {
     },
   ]);
 
-  await openPreview({
-    pageName: draft.title,
-    content: draft.content,
-    imagePath: draft.imagePath,
-  });
-  logger.success('Đã mở preview trong trình duyệt.');
+  try {
+    await openPreview({
+      pageName: draft.title,
+      content: draft.content || '',
+      imagePath: draft.imagePath,
+    });
+    logger.success('Đã mở preview trong trình duyệt.');
+  } catch (err) {
+    logger.error(`Không thể mở preview: ${err.message}`);
+  }
 }
 
 // ── Xóa bài nháp ─────────────────────────────────────────────────────────────

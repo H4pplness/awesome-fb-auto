@@ -6,7 +6,7 @@ import { IMAGES_DIR } from '../services/storage.js';
 import { logger } from '../utils/logger.js';
 
 export async function searchImageCommand(options) {
-  const { query, source = 'unsplash', count = 5 } = options;
+  const { query, source = 'unsplash', count = 5, auto } = options;
 
   let adapter;
   try {
@@ -32,6 +32,29 @@ export async function searchImageCommand(options) {
     return;
   }
 
+  // Chế độ tự động: tải N ảnh đầu tiên không cần chọn
+  if (auto !== undefined) {
+    const autoCount = Math.min(Number(auto), results.length);
+    const targets = results.slice(0, autoCount);
+    const savedPaths = [];
+
+    const dlSpinner = ora(`Đang tự động tải ${autoCount} ảnh đầu tiên...`).start();
+    for (const img of targets) {
+      const destPath = path.join(IMAGES_DIR, `${img.id}.jpg`);
+      try {
+        await adapter.download(img.downloadUrl, destPath);
+        savedPaths.push(destPath);
+        dlSpinner.text = `Đã tải ${savedPaths.length}/${autoCount}: ${img.description || img.id}`;
+      } catch (err) {
+        logger.warn(`Bỏ qua ảnh ${img.id}: ${err.message}`);
+      }
+    }
+    dlSpinner.succeed(`Đã lưu ${savedPaths.length} ảnh vào ${IMAGES_DIR}`);
+    savedPaths.forEach((p) => logger.dim(p));
+    return savedPaths;
+  }
+
+  // Chế độ interactive: hiển thị danh sách cho người dùng chọn
   const choices = results.map((img) => ({
     name: `[${img.sourceName}] ${img.description} — by ${img.author}\n    ${img.thumbUrl}`,
     value: img,

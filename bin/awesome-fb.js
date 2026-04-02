@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+config({ path: join(dirname(fileURLToPath(import.meta.url)), '../.env') });
 import { program } from 'commander';
 import { addPageCommand } from '../src/commands/add-page.js';
 import { listPagesCommand } from '../src/commands/list-pages.js';
@@ -8,7 +11,7 @@ import { postCommand } from '../src/commands/post.js';
 import { draftMenuCommand, draftListCommand, draftSaveCommand, draftPreviewCommand, draftDeleteCommand } from '../src/commands/draft.js';
 
 program
-  .name('fb-post')
+  .name('awesome-fb')
   .description('CLI tool để quản lý và đăng bài lên Facebook Page')
   .version('1.0.0');
 
@@ -27,7 +30,8 @@ program
   .description('Tìm kiếm và tải ảnh từ Unsplash / Pexels')
   .requiredOption('-q, --query <query>', 'Từ khóa tìm kiếm')
   .option('-s, --source <source>', 'Nguồn ảnh (unsplash, pexels)', 'unsplash')
-  .option('-n, --count <number>', 'Số lượng ảnh hiển thị', '5')
+  .option('-n, --count <number>', 'Số lượng ảnh tìm kiếm', '5')
+  .option('-a, --auto <number>', 'Tự động tải N ảnh đầu tiên, không cần chọn')
   .action((options) => searchImageCommand(options));
 
 program
@@ -53,7 +57,10 @@ draft
 draft
   .command('save')
   .description('Lưu bài viết mới vào nháp')
-  .action(() => draftSaveCommand());
+  .option('-t, --title <title>', 'Tiêu đề bài nháp')
+  .option('-m, --message <text>', 'Nội dung bài viết (bỏ qua editor)')
+  .option('-i, --image <path>', 'Đường dẫn ảnh local')
+  .action((options) => draftSaveCommand(options));
 
 draft
   .command('preview')

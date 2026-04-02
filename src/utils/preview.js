@@ -4,20 +4,20 @@ import os from 'os';
 import open from 'open';
 
 function escapeHtml(str) {
-  return str
+  return (str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/\n/g, '<br>');
+    .replace(/"/g, '&quot;');
 }
 
 function imageTag(imagePath) {
   if (!imagePath) return '';
-  const ext = path.extname(imagePath).slice(1).toLowerCase() || 'jpeg';
+  const resolvedPath = path.isAbsolute(imagePath) ? imagePath : path.resolve(process.cwd(), imagePath);
+  const ext = path.extname(resolvedPath).slice(1).toLowerCase() || 'jpeg';
   const mimeType = ext === 'png' ? 'image/png' : ext === 'gif' ? 'image/gif' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
   try {
-    const data = fs.readFileSync(imagePath);
+    const data = fs.readFileSync(resolvedPath);
     const base64 = data.toString('base64');
     return `<img src="data:${mimeType};base64,${base64}" alt="Post image">`;
   } catch {

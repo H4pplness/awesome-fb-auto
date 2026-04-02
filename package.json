@@ -4,7 +4,7 @@
   "description": "CLI tool để đăng bài lên Facebook Page",
   "type": "module",
   "bin": {
-    "fb-post": "./bin/fb-post.js"
+    "awesome-fb": "./bin/awesome-fb.js"
   },
   "keywords": [
     "facebook",
