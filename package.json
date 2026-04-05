@@ -6,6 +6,7 @@
   "bin": {
     "awesome-fb": "./bin/awesome-fb.js"
   },
+  "license": "MIT",
   "keywords": [
     "facebook",
     "cli",
