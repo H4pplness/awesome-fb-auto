@@ -1,14 +1,14 @@
 # awesome-fb
 
-CLI tool đăng bài lên Facebook Page, viết bằng Node.js.
+CLI tool for posting to Facebook Pages, built with Node.js.
 
-## Cài đặt
+## Installation
 
 ```bash
 npm install -g awesome-fb
 ```
 
-Hoặc dùng trực tiếp từ source:
+Or run directly from source:
 
 ```bash
 git clone <repo>
@@ -17,63 +17,63 @@ npm install
 npm link
 ```
 
-> Trên Windows với Git Bash, nếu `awesome-fb` không nhận sau `npm link`, thêm alias vào `~/.bashrc`:
+> On Windows with Git Bash, if `awesome-fb` is not recognized after `npm link`, add an alias to `~/.bashrc`:
 > ```bash
 > alias awesome-fb="node '/path/to/fbtool/bin/awesome-fb.js'"
 > ```
 
 ---
 
-## Cấu hình API Keys
+## API Key Configuration
 
-Tạo file `.env` tại thư mục làm việc:
+Create a `.env` file in your working directory:
 
 ```env
 UNSPLASH_ACCESS_KEY=your_unsplash_key
 PEXELS_API_KEY=your_pexels_key
 ```
 
-Lấy key tại: [Unsplash Developers](https://unsplash.com/developers) · [Pexels API](https://www.pexels.com/api/)
+Get your keys at: [Unsplash Developers](https://unsplash.com/developers) · [Pexels API](https://www.pexels.com/api/)
 
 ---
 
-## Tổng quan lệnh
+## Command Overview
 
 ```
-awesome-fb add-page                                  Thêm Facebook Page mới
-awesome-fb list-pages                                Xem danh sách pages đã lưu
+awesome-fb add-page                                  Add a new Facebook Page
+awesome-fb list-pages                                View saved pages
 
-awesome-fb search-image -q <từ khóa>                Tìm ảnh, chọn thủ công
-awesome-fb search-image -q <từ khóa> -a <n>         Tự động tải N ảnh đầu tiên
+awesome-fb search-image -q <keyword>                Search images, select manually
+awesome-fb search-image -q <keyword> -a <n>         Auto-download the first N images
 
-awesome-fb post                                      Đăng bài (interactive)
-awesome-fb post -p <page> -m <nội dung> -y           Đăng bài nhanh 1 dòng
+awesome-fb post                                      Post (interactive)
+awesome-fb post -p <page> -m <content> -y           Quick one-line post
 
-awesome-fb draft                                     Menu quản lý bài nháp
-awesome-fb draft save                                Lưu bài nháp mới
-awesome-fb draft list                                Xem danh sách nháp
-awesome-fb draft preview                             Preview bài nháp trong trình duyệt
-awesome-fb draft delete                              Xóa bài nháp
+awesome-fb draft                                     Draft management menu
+awesome-fb draft save                                Save a new draft
+awesome-fb draft list                                List all drafts
+awesome-fb draft preview                             Preview a draft in the browser
+awesome-fb draft delete                              Delete a draft
 ```
 
 ---
 
-## Quản lý Pages
+## Managing Pages
 
-### Thêm page
+### Add a page
 
 ```bash
 awesome-fb add-page
 ```
 
-1. Nhập **Page ID** — phần số trong URL trang Facebook
-2. Nhập **Access Token** — lấy từ [Graph API Explorer](https://developers.facebook.com/tools/explorer/), chọn page rồi copy token
-3. CLI tự xác minh với Facebook, hiển thị tên page thật
-4. Đặt **tên gợi nhớ** để phân biệt khi có nhiều page
+1. Enter the **Page ID** — the numeric part of the Facebook page URL
+2. Enter the **Access Token** — get it from [Graph API Explorer](https://developers.facebook.com/tools/explorer/), select your page and copy the token
+3. The CLI verifies with Facebook and displays the real page name
+4. Set a **friendly name** to distinguish between multiple pages
 
-Nếu page đã tồn tại, CLI hỏi có muốn cập nhật token mới không.
+If the page already exists, the CLI asks if you want to update the token.
 
-### Xem danh sách pages
+### View saved pages
 
 ```bash
 awesome-fb list-pages
@@ -81,46 +81,46 @@ awesome-fb list-pages
 
 ---
 
-## Tìm kiếm ảnh
+## Image Search
 
 ```bash
 awesome-fb search-image --query "coffee morning"
 ```
 
-| Flag | Mô tả | Mặc định |
+| Flag | Description | Default |
 |---|---|---|
-| `-q, --query` | Từ khóa tìm kiếm **(bắt buộc)** | — |
-| `-s, --source` | Nguồn ảnh: `unsplash`, `pexels` | `unsplash` |
-| `-n, --count` | Số lượng ảnh tìm kiếm | `5` |
-| `-a, --auto` | Tự động tải N ảnh đầu tiên, không cần chọn | — |
+| `-q, --query` | Search keyword **(required)** | — |
+| `-s, --source` | Image source: `unsplash`, `pexels` | `unsplash` |
+| `-n, --count` | Number of images to search | `5` |
+| `-a, --auto` | Auto-download the first N images without prompting | — |
 
-Ảnh tải về lưu tại `~/.awesome-fb/images/`.
+Downloaded images are saved to `~/.awesome-fb/images/`.
 
-### Chế độ thủ công (mặc định)
+### Manual mode (default)
 
-Hiển thị danh sách ảnh tìm được, người dùng chọn 1 ảnh để tải:
+Displays a list of found images; the user selects one to download:
 
 ```bash
 awesome-fb search-image --query "nature sunset" --source pexels --count 10
 ```
 
-### Chế độ tự động (`--auto`)
+### Auto mode (`--auto`)
 
-Bỏ qua bước chọn, tự động tải N ảnh đầu tiên ngay sau khi tìm kiếm:
+Skips the selection step and automatically downloads the first N images:
 
 ```bash
-# Tải 3 ảnh đầu tiên tự động
+# Auto-download the first 3 images
 awesome-fb search-image --query "coffee" --auto 3
 
-# Tìm 20 ảnh, tự động tải 5 ảnh đầu
+# Search 20 images, auto-download the first 5
 awesome-fb search-image --query "nature" --count 20 --auto 5
 ```
 
-CLI hiển thị tiến trình từng ảnh đang tải và in đường dẫn từng file khi xong.
+The CLI displays download progress per image and prints each file path when done.
 
 ---
 
-## Đăng bài
+## Posting
 
 ### Interactive
 
@@ -128,100 +128,100 @@ CLI hiển thị tiến trình từng ảnh đang tải và in đường dẫn t
 awesome-fb post
 ```
 
-Luồng thực hiện:
-1. Nếu có bài nháp → hỏi có muốn tải từ nháp không
-2. Chọn page muốn đăng
-3. Nhập nội dung bài viết (mở editor)
-4. Chọn có đính kèm ảnh không: tìm qua Unsplash/Pexels hoặc nhập đường dẫn local
-5. Preview bài trong trình duyệt (giả lập giao diện Facebook)
-6. Xác nhận rồi đăng
+Flow:
+1. If drafts exist → ask if you want to load from a draft
+2. Select the page to post to
+3. Enter post content (opens editor)
+4. Choose whether to attach an image: search via Unsplash/Pexels or enter a local path
+5. Preview the post in the browser (simulated Facebook interface)
+6. Confirm and post
 
-### Đăng nhanh 1 dòng
+### Quick one-line post
 
 ```bash
-# Chỉ text
-awesome-fb post -p "Trang chính" -m "Nội dung bài viết" --no-preview -y
+# Text only
+awesome-fb post -p "Main Page" -m "Post content" --no-preview -y
 
-# Kèm ảnh local
-awesome-fb post -p "Shop A" -m "Flash sale hôm nay!" -i "/path/to/anh.jpg" --no-preview -y
+# With a local image
+awesome-fb post -p "Shop A" -m "Flash sale today!" -i "/path/to/image.jpg" --no-preview -y
 
-# Bỏ qua chọn page, vẫn mở editor nhập nội dung
-awesome-fb post -p "Trang chính"
+# Skip page selection, still open editor to enter content
+awesome-fb post -p "Main Page"
 ```
 
-| Flag | Mô tả |
+| Flag | Description |
 |---|---|
-| `-p, --page <name>` | Tên gợi nhớ page — bỏ qua prompt chọn page |
-| `-m, --message <text>` | Nội dung bài — bỏ qua editor |
-| `-i, --image <path>` | Đường dẫn ảnh local |
-| `--no-preview` | Bỏ qua bước mở preview trình duyệt |
-| `-y, --yes` | Tự xác nhận, không hỏi lại |
+| `-p, --page <name>` | Page friendly name — skips the page selection prompt |
+| `-m, --message <text>` | Post content — skips the editor |
+| `-i, --image <path>` | Local image path |
+| `--no-preview` | Skip the browser preview step |
+| `-y, --yes` | Auto-confirm, no re-prompting |
 
 ---
 
-## Bài viết nháp
+## Drafts
 
-Lưu bài viết chưa đăng để dùng lại sau, có thể preview trước khi đăng.
-
-```bash
-awesome-fb draft           # Menu tổng hợp
-awesome-fb draft save      # Lưu bài nháp mới (interactive)
-awesome-fb draft list      # Xem danh sách nháp (tiêu đề, preview nội dung, ngày cập nhật)
-awesome-fb draft preview   # Preview bài nháp trong trình duyệt
-awesome-fb draft delete    # Xóa bài nháp (có xác nhận)
-```
-
-### Tạo nháp nhanh 1 dòng
+Save unposted content to reuse later, with the option to preview before posting.
 
 ```bash
-# Đủ --title và --message → lưu ngay, không hỏi gì
-awesome-fb draft save -t "Flash sale tháng 4" -m "Giảm 50% toàn bộ sản phẩm hôm nay!"
-
-# Kèm ảnh
-awesome-fb draft save -t "Bài cuối tuần" -m "Chúc mừng cuối tuần!" -i "/path/anh.jpg"
-
-# Dùng một phần — chỉ điền title, vẫn mở editor nhập nội dung
-awesome-fb draft save -t "Ý tưởng mới"
+awesome-fb draft           # Main menu
+awesome-fb draft save      # Save a new draft (interactive)
+awesome-fb draft list      # View drafts (title, content preview, last updated)
+awesome-fb draft preview   # Preview a draft in the browser
+awesome-fb draft delete    # Delete a draft (with confirmation)
 ```
 
-| Flag | Mô tả |
+### Quick one-line draft
+
+```bash
+# Provide both --title and --message → saves immediately without prompting
+awesome-fb draft save -t "April Flash Sale" -m "50% off all products today!"
+
+# With an image
+awesome-fb draft save -t "Weekend Post" -m "Happy weekend!" -i "/path/image.jpg"
+
+# Partial — only title, still opens editor for content
+awesome-fb draft save -t "New idea"
+```
+
+| Flag | Description |
 |---|---|
-| `-t, --title <title>` | Tiêu đề bài nháp |
-| `-m, --message <text>` | Nội dung bài — bỏ qua editor |
-| `-i, --image <path>` | Đường dẫn ảnh local |
+| `-t, --title <title>` | Draft title |
+| `-m, --message <text>` | Post content — skips the editor |
+| `-i, --image <path>` | Local image path |
 
-Khi chạy `awesome-fb post`, nếu có bài nháp CLI sẽ hỏi:
+When running `awesome-fb post`, if drafts exist the CLI will ask:
 
 ```
-? Bạn có 2 bài nháp. Tải nội dung từ bài nháp? (y/N)
+? You have 2 drafts. Load content from a draft? (y/N)
 ```
 
-Chọn nháp xong tự điền nội dung và ảnh, không cần nhập lại từ đầu.
+Select a draft to auto-fill content and image path, no need to re-enter.
 
 ---
 
-## Dữ liệu lưu trữ
+## Data Storage
 
-Tất cả dữ liệu lưu trên máy người dùng, không có server:
+All data is stored locally on the user's machine — no server involved:
 
 ```
 ~/.awesome-fb/
-├── config.json   # Danh sách pages và access token
-├── drafts.json   # Bài viết nháp
-└── images/       # Ảnh đã tải về
+├── config.json   # List of pages and access tokens
+├── drafts.json   # Draft posts
+└── images/       # Downloaded images
 ```
 
-> **Lưu ý bảo mật:** Access token lưu plain text. Giữ bí mật thư mục `~/.awesome-fb/`.
+> **Security note:** Access tokens are stored in plain text. Keep the `~/.awesome-fb/` directory private.
 
 ---
 
-## Xử lý lỗi thường gặp
+## Common Errors
 
-| Lỗi | Cách xử lý |
+| Error | Solution |
 |---|---|
-| `Chưa có page nào` | Chạy `awesome-fb add-page` trước |
-| `Token hết hạn` | Lấy token mới rồi chạy lại `awesome-fb add-page` |
-| `Thiếu UNSPLASH_ACCESS_KEY` | Thêm key vào file `.env` |
-| `Page ID không tồn tại` | Kiểm tra lại Page ID trên Facebook |
-| `Không thể mở preview` | Kiểm tra đường dẫn ảnh có tồn tại không |
-| `command not found: awesome-fb` | Chạy `npm link` hoặc thêm alias vào `~/.bashrc` |
+| `No pages found` | Run `awesome-fb add-page` first |
+| `Token expired` | Get a new token and run `awesome-fb add-page` again |
+| `Missing UNSPLASH_ACCESS_KEY` | Add the key to your `.env` file |
+| `Page ID does not exist` | Double-check the Page ID on Facebook |
+| `Cannot open preview` | Verify the image path exists |
+| `command not found: awesome-fb` | Run `npm link` or add an alias to `~/.bashrc` |

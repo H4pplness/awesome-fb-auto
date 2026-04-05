@@ -1,69 +1,69 @@
-# 📋 Đặc Tả Kỹ Thuật: awesome-fb
+# Technical Specification: awesome-fb
 
-> **Công cụ CLI đăng bài lên Facebook Page — viết bằng Node.js, phân phối qua npm**
+> **CLI tool for posting to Facebook Pages — built with Node.js, distributed via npm**
 
 ---
 
-## 1. Tổng Quan Dự Án
+## 1. Project Overview
 
-| Thuộc tính | Chi tiết |
+| Property | Details |
 |---|---|
-| **Tên package** | `awesome-fb` |
-| **Ngôn ngữ** | Node.js (ES Modules hoặc CommonJS) |
-| **Phân phối** | npm public registry |
-| **Lưu trữ** | Local (trên máy người dùng) |
-| **Mục tiêu** | CLI đơn giản để quản lý và đăng bài lên Facebook Page |
+| **Package name** | `awesome-fb` |
+| **Language** | Node.js (ES Modules or CommonJS) |
+| **Distribution** | npm public registry |
+| **Storage** | Local (on the user's machine) |
+| **Goal** | Simple CLI for managing and posting to Facebook Pages |
 
 ---
 
-## 2. Kiến Trúc Tổng Thể
+## 2. Overall Architecture
 
 ```
 awesome-fb/
 ├── bin/
-│   └── fb-post.js           # Entry point CLI (shebang script)
+│   └── fb-post.js           # CLI entry point (shebang script)
 ├── src/
 │   ├── commands/
-│   │   ├── post.js          # Lệnh: tạo bài viết
-│   │   ├── search-image.js  # Lệnh: tìm kiếm ảnh
-│   │   ├── add-page.js      # Lệnh: thêm page
-│   │   └── list-pages.js    # Lệnh: liệt kê page
+│   │   ├── post.js          # Command: create post
+│   │   ├── search-image.js  # Command: search images
+│   │   ├── add-page.js      # Command: add page
+│   │   └── list-pages.js    # Command: list pages
 │   ├── adapters/
-│   │   ├── image-adapter.js     # Interface chuẩn cho image source
-│   │   ├── unsplash-adapter.js  # Adapter cho Unsplash
-│   │   └── pexels-adapter.js    # (Ví dụ mở rộng) Adapter cho Pexels
+│   │   ├── image-adapter.js     # Standard interface for image sources
+│   │   ├── unsplash-adapter.js  # Adapter for Unsplash
+│   │   └── pexels-adapter.js    # (Extension example) Adapter for Pexels
 │   ├── services/
-│   │   ├── facebook.js      # Giao tiếp với Facebook Graph API
-│   │   └── storage.js       # Đọc/ghi dữ liệu local
+│   │   ├── facebook.js      # Communication with Facebook Graph API
+│   │   └── storage.js       # Read/write local data
 │   └── utils/
-│       ├── config.js        # Quản lý đường dẫn config local
-│       └── logger.js        # Log / hiển thị kết quả ra terminal
+│       ├── config.js        # Manage local config paths
+│       └── logger.js        # Log / display results in terminal
 ├── package.json
 └── README.md
 ```
 
 ---
 
-## 3. Lưu Trữ Local
+## 3. Local Storage
 
-Tất cả dữ liệu được lưu trên máy người dùng, **không có server/database từ xa**.
+All data is stored on the user's machine — **no remote server or database**.
 
-### 3.1 Đường dẫn lưu trữ
+### 3.1 Storage paths
 
 ```
 ~/.awesome-fb/
-├── config.json      # Danh sách pages đã thêm
-└── images/          # Ảnh tải về từ các nguồn tìm kiếm
+├── config.json      # List of added pages
+└── images/          # Images downloaded from search sources
 ```
 
-### 3.2 Cấu trúc `config.json`
+### 3.2 `config.json` structure
 
 ```json
 {
   "pages": [
     {
       "id": "123456789",
-      "name": "Trang Bán Hàng A",
+      "name": "Main Store Page",
       "accessToken": "EAAxxxxxx...",
       "addedAt": "2025-04-01T08:00:00Z"
     }
@@ -71,42 +71,42 @@ Tất cả dữ liệu được lưu trên máy người dùng, **không có ser
 }
 ```
 
-> **Bảo mật:** Access token được lưu plain text ở local. Người dùng cần tự bảo vệ thư mục `~/.awesome-fb/`. Phiên bản sau có thể tích hợp keychain/OS secret store.
+> **Security:** Access tokens are stored in plain text locally. Users are responsible for protecting the `~/.awesome-fb/` directory. A future version may integrate with the OS keychain/secret store.
 
 ---
 
-## 4. Chức Năng Chi Tiết
+## 4. Feature Details
 
-### 4.1 Tạo Bài Viết (`post`)
+### 4.1 Create Post (`post`)
 
-**Lệnh:**
+**Command:**
 ```bash
 fb-post post
 ```
 
-**Luồng thực thi:**
+**Execution flow:**
 
-1. Kiểm tra danh sách pages trong `config.json`. Nếu chưa có page nào → báo lỗi, hướng dẫn dùng `add-page`.
-2. Hiển thị menu chọn page (dùng `inquirer` hoặc tương đương).
-3. Nhập **nội dung bài viết** (content/caption).
-4. Hỏi người dùng có muốn đính kèm ảnh không:
-   - **Có** → cho phép chọn: (a) tìm ảnh qua lệnh search, hoặc (b) nhập đường dẫn ảnh local.
-   - **Không** → bỏ qua bước ảnh.
-5. Xác nhận thông tin trước khi đăng.
-6. Gọi **Facebook Graph API** để đăng bài.
-7. Hiển thị kết quả: Post ID, link bài viết.
+1. Check for pages in `config.json`. If none exist → display error and guide user to `add-page`.
+2. Display page selection menu (using `inquirer` or equivalent).
+3. Enter **post content** (content/caption).
+4. Ask the user if they want to attach an image:
+   - **Yes** → choose: (a) search for an image via the search command, or (b) enter a local file path.
+   - **No** → skip the image step.
+5. Confirm details before posting.
+6. Call the **Facebook Graph API** to publish the post.
+7. Display result: Post ID, post link.
 
-**Facebook API sử dụng:**
+**Facebook API used:**
 
-| Trường hợp | Endpoint |
+| Case | Endpoint |
 |---|---|
-| Chỉ text | `POST /{page-id}/feed` |
-| Text + ảnh | `POST /{page-id}/photos` |
+| Text only | `POST /{page-id}/feed` |
+| Text + image | `POST /{page-id}/photos` |
 
-**Payload mẫu (text + ảnh):**
+**Sample payload (text + image):**
 ```json
 {
-  "message": "Nội dung bài viết",
+  "message": "Post content",
   "source": "<binary image data>",
   "access_token": "<page_access_token>"
 }
@@ -114,53 +114,53 @@ fb-post post
 
 ---
 
-### 4.2 Tìm Kiếm Ảnh (`search-image`)
+### 4.2 Image Search (`search-image`)
 
-**Lệnh:**
+**Command:**
 ```bash
 fb-post search-image --query "coffee morning" --source unsplash
 ```
 
-**Tham số:**
+**Parameters:**
 
-| Flag | Bắt buộc | Mô tả | Mặc định |
+| Flag | Required | Description | Default |
 |---|---|---|---|
-| `--query` / `-q` | ✅ | Từ khóa tìm kiếm | — |
-| `--source` / `-s` | ❌ | Nguồn ảnh (`unsplash`, `pexels`, ...) | `unsplash` |
-| `--count` / `-n` | ❌ | Số lượng ảnh hiển thị | `5` |
+| `--query` / `-q` | ✅ | Search keyword | — |
+| `--source` / `-s` | ❌ | Image source (`unsplash`, `pexels`, ...) | `unsplash` |
+| `--count` / `-n` | ❌ | Number of images to display | `5` |
 
-**Luồng thực thi:**
+**Execution flow:**
 
-1. Nhận `--query` và `--source` từ người dùng.
-2. Gọi đúng **Adapter** tương ứng với `--source`.
-3. Hiển thị danh sách ảnh (thumbnail URL + tên tác giả).
-4. Người dùng chọn ảnh muốn tải về.
-5. Tải ảnh về thư mục `~/.awesome-fb/images/`.
-6. Hiển thị đường dẫn file đã lưu.
+1. Receive `--query` and `--source` from the user.
+2. Call the correct **Adapter** for the given `--source`.
+3. Display the list of images (thumbnail URL + author name).
+4. User selects the image they want to download.
+5. Download the image to `~/.awesome-fb/images/`.
+6. Display the saved file path.
 
 #### Adapter Pattern
 
-Tất cả adapter phải implement interface sau:
+All adapters must implement the following interface:
 
 ```javascript
 // src/adapters/image-adapter.js (Interface / Base class)
 class ImageAdapter {
   /**
-   * @param {string} query - Từ khóa tìm kiếm
-   * @param {number} count - Số lượng kết quả
+   * @param {string} query - Search keyword
+   * @param {number} count - Number of results
    * @returns {Promise<ImageResult[]>}
    */
   async search(query, count) {
-    throw new Error('search() phải được implement bởi adapter con');
+    throw new Error('search() must be implemented by the subclass adapter');
   }
 
   /**
-   * @param {string} url - URL ảnh cần tải
-   * @param {string} destPath - Đường dẫn lưu file
-   * @returns {Promise<string>} - Đường dẫn file đã lưu
+   * @param {string} url - Image URL to download
+   * @param {string} destPath - File save path
+   * @returns {Promise<string>} - Saved file path
    */
   async download(url, destPath) {
-    throw new Error('download() phải được implement bởi adapter con');
+    throw new Error('download() must be implemented by the subclass adapter');
   }
 }
 
@@ -179,127 +179,127 @@ class ImageAdapter {
 
 - API: `https://api.unsplash.com/search/photos`
 - Auth: `Authorization: Client-ID <UNSPLASH_ACCESS_KEY>`
-- Người dùng cần cấu hình `UNSPLASH_ACCESS_KEY` (xem Phần 6).
+- Users need to configure `UNSPLASH_ACCESS_KEY` (see Section 6).
 
-**Thêm nguồn ảnh mới:**  
-Chỉ cần tạo file `<ten>-adapter.js` trong `src/adapters/`, implement `search()` và `download()`, rồi đăng ký trong `adapter-registry.js`.
+**Adding a new image source:**  
+Simply create `<name>-adapter.js` in `src/adapters/`, implement `search()` and `download()`, then register it in `adapter-registry.js`.
 
 ---
 
-### 4.3 Thêm Page (`add-page`)
+### 4.3 Add Page (`add-page`)
 
-**Lệnh:**
+**Command:**
 ```bash
 fb-post add-page
 ```
 
-**Luồng thực thi:**
+**Execution flow:**
 
-1. Prompt nhập **Page ID** (lấy từ Facebook).
-2. Prompt nhập **Access Token** của page đó.
-3. Gọi Facebook Graph API để **xác minh** page tồn tại và token hợp lệ:
+1. Prompt for **Page ID** (from Facebook).
+2. Prompt for the page's **Access Token**.
+3. Call the Facebook Graph API to **verify** the page exists and the token is valid:
    ```
    GET /{page-id}?fields=id,name&access_token={token}
    ```
-4. Nếu hợp lệ: hiển thị tên page thực tế từ Facebook.
-5. Prompt yêu cầu người dùng **đặt tên gợi nhớ** cho page trong CLI (ví dụ: "Trang chính", "Shop A").
-6. Lưu thông tin vào `~/.awesome-fb/config.json`.
-7. Hiển thị thông báo thành công.
+4. If valid: display the actual page name from Facebook.
+5. Prompt the user to **set a friendly name** for the page in the CLI (e.g., "Main Page", "Shop A").
+6. Save the information to `~/.awesome-fb/config.json`.
+7. Display a success message.
 
-**Xử lý lỗi:**
+**Error handling:**
 
-- Token hết hạn / sai → thông báo rõ ràng, không lưu.
-- Page ID không tồn tại → báo lỗi.
-- Page đã tồn tại trong config → hỏi có muốn cập nhật token không.
+- Expired / invalid token → clear error message, nothing is saved.
+- Page ID does not exist → error message.
+- Page already exists in config → ask if you want to update the token.
 
 ---
 
-### 4.4 Liệt Kê Pages (`list-pages`)
+### 4.4 List Pages (`list-pages`)
 
-**Lệnh:**
+**Command:**
 ```bash
 fb-post list-pages
 ```
 
-**Output mẫu:**
+**Sample output:**
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Danh sách Facebook Pages đã lưu                    │
+│  Saved Facebook Pages                                │
 ├───┬──────────────────┬─────────────────┬────────────┤
-│ # │ Tên gợi nhớ      │ Page ID         │ Ngày thêm  │
+│ # │ Friendly Name    │ Page ID         │ Date Added │
 ├───┼──────────────────┼─────────────────┼────────────┤
-│ 1 │ Trang chính      │ 123456789       │ 01/04/2025 │
+│ 1 │ Main Page        │ 123456789       │ 01/04/2025 │
 │ 2 │ Shop A           │ 987654321       │ 15/03/2025 │
 └───┴──────────────────┴─────────────────┴────────────┘
-Tổng: 2 page(s)
+Total: 2 page(s)
 ```
 
 ---
 
-## 5. Sơ Đồ Luồng Dữ Liệu
+## 5. Data Flow Diagram
 
 ```
-Người dùng (Terminal)
+User (Terminal)
         │
         ▼
    bin/fb-post.js  ──── parse args (commander/yargs)
         │
         ▼
-  commands/*.js   ──── logic điều phối
+  commands/*.js   ──── orchestration logic
         │
    ┌────┴──────────────────────────┐
    ▼                               ▼
 services/storage.js       services/facebook.js
-(đọc/ghi local)            (gọi Graph API)
+(local read/write)         (Graph API calls)
 ~/.awesome-fb/
         │
         ▼
    adapters/*.js
-(tìm & tải ảnh từ API bên ngoài)
+(search & download images from external APIs)
 ```
 
 ---
 
-## 6. Cấu Hình API Keys
+## 6. API Key Configuration
 
-Người dùng cấu hình API key qua **biến môi trường** hoặc file `.env` tại thư mục hiện tại:
+Users configure API keys via **environment variables** or a `.env` file in the current directory:
 
 ```bash
 # Unsplash
 UNSPLASH_ACCESS_KEY=your_unsplash_key
 
-# (Mở rộng) Pexels
+# (Extension) Pexels
 PEXELS_API_KEY=your_pexels_key
 ```
 
-CLI sẽ đọc từ `process.env` và hiển thị cảnh báo nếu thiếu key khi dùng tính năng liên quan.
+The CLI reads from `process.env` and displays a warning if a key is missing when using the related feature.
 
 ---
 
-## 7. Dependencies Dự Kiến
+## 7. Expected Dependencies
 
-| Package | Mục đích |
+| Package | Purpose |
 |---|---|
-| `commander` hoặc `yargs` | Parse CLI arguments |
-| `inquirer` | Interactive prompts (chọn page, ảnh...) |
-| `axios` hoặc `node-fetch` | Gọi HTTP API (Facebook, Unsplash...) |
-| `cli-table3` | Hiển thị bảng đẹp trong terminal |
-| `chalk` | Tô màu output terminal |
-| `ora` | Spinner loading khi gọi API |
-| `fs-extra` | Thao tác file/thư mục nâng cao |
-| `dotenv` | Đọc biến môi trường từ `.env` |
+| `commander` or `yargs` | Parse CLI arguments |
+| `inquirer` | Interactive prompts (select page, image, etc.) |
+| `axios` or `node-fetch` | HTTP API calls (Facebook, Unsplash, etc.) |
+| `cli-table3` | Display formatted tables in terminal |
+| `chalk` | Colorize terminal output |
+| `ora` | Loading spinner during API calls |
+| `fs-extra` | Advanced file/directory operations |
+| `dotenv` | Read environment variables from `.env` |
 
 ---
 
-## 8. Phân Phối lên npm
+## 8. Publishing to npm
 
-### 8.1 Cấu hình `package.json`
+### 8.1 `package.json` configuration
 
 ```json
 {
   "name": "awesome-fb",
   "version": "1.0.0",
-  "description": "CLI tool để đăng bài lên Facebook Page",
+  "description": "CLI tool for posting to Facebook Pages",
   "bin": {
     "fb-post": "./bin/fb-post.js"
   },
@@ -315,26 +315,26 @@ CLI sẽ đọc từ `process.env` và hiển thị cảnh báo nếu thiếu ke
 }
 ```
 
-### 8.2 Quy trình publish
+### 8.2 Publish process
 
 ```bash
-# 1. Đăng nhập npm
+# 1. Log in to npm
 npm login
 
-# 2. Kiểm tra package trước khi publish
+# 2. Verify package before publishing
 npm pack --dry-run
 
 # 3. Publish
 npm publish --access public
 ```
 
-### 8.3 Cách người dùng cài đặt và sử dụng
+### 8.3 How users install and use it
 
 ```bash
-# Cài đặt global
+# Install globally
 npm install -g awesome-fb
 
-# Sử dụng ngay
+# Use immediately
 fb-post list-pages
 fb-post add-page
 fb-post search-image --query "nature sunset"
@@ -343,27 +343,27 @@ fb-post post
 
 ---
 
-## 9. Xử Lý Lỗi & UX
+## 9. Error Handling & UX
 
-| Tình huống | Hành vi |
+| Situation | Behavior |
 |---|---|
-| Chưa có page nào | Thông báo rõ ràng + hướng dẫn chạy `add-page` |
-| Token hết hạn | Hiển thị lỗi + hướng dẫn lấy token mới |
-| Thiếu API key ảnh | Cảnh báo, bỏ qua tính năng tìm ảnh |
-| Không có Internet | Bắt lỗi mạng, thông báo thân thiện |
-| File `config.json` bị hỏng | Tự tạo lại file mới, cảnh báo người dùng |
+| No pages saved | Clear message + guidance to run `add-page` |
+| Token expired | Display error + guide to get a new token |
+| Missing image API key | Warning, skip image search feature |
+| No internet | Catch network error, display friendly message |
+| `config.json` corrupted | Auto-recreate the file, warn the user |
 
 ---
 
-## 10. Lộ Trình Mở Rộng (Future)
+## 10. Future Roadmap
 
-- Thêm adapter ảnh: **Pexels**, **Pixabay**, **Getty Images**
-- Hỗ trợ đăng **nhiều ảnh** trong một bài (carousel)
-- Hỗ trợ **lên lịch** đăng bài (scheduled post)
-- Lưu **bản nháp** bài viết chưa đăng
-- Hỗ trợ đăng lên **Instagram** (dùng cùng Graph API)
-- Mã hóa access token lưu trữ local (OS keychain)
+- Add image adapters: **Pexels**, **Pixabay**, **Getty Images**
+- Support posting **multiple images** in one post (carousel)
+- Support **scheduling** posts (scheduled post)
+- Save post **drafts** not yet ready to publish
+- Support posting to **Instagram** (using the same Graph API)
+- Encrypt locally stored access tokens (OS keychain)
 
 ---
 
-*Đặc tả phiên bản 1.0 — tháng 4/2025*
+*Specification version 1.0 — April 2025*
